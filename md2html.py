@@ -35,38 +35,39 @@ def convert(infile, outfile):
 		return 
 	
 
-	w.write('''<html><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><head><title>Testing Code</title><style>
+	pre = 0
+	blockquote = 0
+	stringBuffer = 	'''
+<html><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><head><title>Testing Code</title><style>
 body	{color: black; font-family: Arial, sans-serif, serif}
 h1,h2,h3 	{color: rebeccapurple;}
 </style>
 </head><body>
-''')
+'''
 
-	pre = 0
-	blockquote = 0
 
 	for line in f:		
 		# first handle for <pre></pre> tags
 		if(line.startswith('   ') ):
 			if pre == 0:
-				w.write('<pre>')
+				stringBuffer += '<pre>'
 				pre = 1
-				w.write(line)
+				stringBuffer += line
 			else:
-				w.write(line)
+				stringBuffer += line
 		elif line.startswith('>') :
 			if blockquote == 0:
-				w.write('<blockquote>')
+				stringBuffer += '<blockquote>'
 				blockquote = 1
-				w.write( line.strip('>') )
+				stringBuffer += line.strip('>') 
 			else:
-				w.write( line.strip('>') )
+				stringBuffer += line.strip('>') 
 		else:
 			if pre == 1:
-				w.write( '</pre>' )
+				stringBuffer += '</pre>' 
 				pre = 0
 			if blockquote == 1:
-				w.write('</blockquote>')
+				stringBuffer += '</blockquote>'
 				blockquote = 0
 		
 			line = line.strip()
@@ -75,25 +76,26 @@ h1,h2,h3 	{color: rebeccapurple;}
 
 			if(line.startswith("#")):
 				if(line.startswith("###")):
-					w.write("<h3>" + line.split('###')[1] + "</h3>")
+					stringBuffer += "<h3>" + line.split('###')[1] + "</h3>"
 				elif(line.startswith("##")):
-					w.write("<h2>" + line.split('##')[1] + "</h2>")
+					stringBuffer += "<h2>" + line.split('##')[1] + "</h2>"
 				elif(line.startswith("#")):
-					w.write("<h1>" + line.split('#')[1] + "</h1>")
+					stringBuffer += "<h1>" + line.split('#')[1] + "</h1>"
 			else:
 				#check if it is an image
 				if( line.find("<img ") > -1):
-					w.write(line)
+					stringBuffer += line
 				elif( line.startswith('![') ):
 					#image tag
 					(alt, link) = line.split('![')[1].split(']')
 					link = link.strip('(').strip(')')
-					w.write("<img style=\"float: right;\" src=\""+ link + "\" alt=\"" + alt + "\" />")
+					stringBuffer += "<img style=\"float: right;\" src=\""+ link + "\" alt=\"" + alt + "\" />"
 				else:			
-					w.write("<p>" + line + "</p>")	
+					stringBuffer += "<p>" + line + "</p>"
 	
-	w.write("</body></html>")
+	stringBuffer += "</body></html>"
 	f.close()
+	w.write(stringBuffer)
 	w.close()
 
 if __name__ == "__main__":
@@ -104,4 +106,3 @@ if __name__ == "__main__":
 	print 'Converting ' + args.infile + 'to HTML..'	
 	convert(args.infile, args.outfile)
 	print 'Done.'
-
