@@ -58,24 +58,18 @@ h1,h2,h3 	{color: rebeccapurple;}
 		if(line.startswith('   ') ):
 			if pre == 0:
 				stringBuffer += '<pre>'
-				pre = 1
-				stringBuffer += line
-			else:
-				stringBuffer += line
+				pre = 1						
+			stringBuffer += line
 		elif line.startswith('>') :
 			if blockquote == 0:
 				stringBuffer += '<blockquote>'
-				blockquote = 1
-				stringBuffer += line.strip('>') 
-			else:
-				stringBuffer += line.strip('>') 
+				blockquote = 1				
+			stringBuffer += line.strip('>') 
 		elif line.startswith('-'):
 			if ul == 0:
 				stringBuffer += '<ul>'
-				ul = 1
-				stringBuffer += '<li>' + line.strip('-') + '</li>'
-			else:
-				stringBuffer += '<li>' + line.strip('-') + '</li>'
+				ul = 1				
+			stringBuffer += '<li>' + line.strip('-') + '</li>'
 		else:
 			if pre == 1:
 				stringBuffer += '</pre>' 
