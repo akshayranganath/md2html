@@ -1,5 +1,11 @@
 import argparse
 
+try:
+	import htmlmin
+	minification_available = True
+except ImportError:
+	minification_available = False
+
 def find_anchor_tags(line):
 	recursion = False
 
@@ -22,7 +28,7 @@ def find_anchor_tags(line):
 	return line
 
 
-def convert(infile, outfile):
+def convert(infile, outfile, minify):
 	
 	if outfile is None:
 		outfile = infile.split('.md')[0] + '.html'		
@@ -36,7 +42,8 @@ def convert(infile, outfile):
 	
 
 	pre = 0
-	blockquote = 0
+	blockquote = 0	
+	ul = 0
 	stringBuffer = 	'''
 <html><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><head><title>Testing Code</title><style>
 body	{color: black; font-family: Arial, sans-serif, serif}
@@ -62,6 +69,13 @@ h1,h2,h3 	{color: rebeccapurple;}
 				stringBuffer += line.strip('>') 
 			else:
 				stringBuffer += line.strip('>') 
+		elif line.startswith('-'):
+			if ul == 0:
+				stringBuffer += '<ul>'
+				ul = 1
+				stringBuffer += '<li>' + line.strip('-') + '</li>'
+			else:
+				stringBuffer += '<li>' + line.strip('-') + '</li>'
 		else:
 			if pre == 1:
 				stringBuffer += '</pre>' 
@@ -69,6 +83,9 @@ h1,h2,h3 	{color: rebeccapurple;}
 			if blockquote == 1:
 				stringBuffer += '</blockquote>'
 				blockquote = 0
+			if ul == 1:
+				stringBuffer += '</ul>'
+				ul = 0
 		
 			line = line.strip()
 			# now run the link check
@@ -94,15 +111,25 @@ h1,h2,h3 	{color: rebeccapurple;}
 					stringBuffer += "<p>" + line + "</p>"
 	
 	stringBuffer += "</body></html>"
-	f.close()
+	
+	#check if minification is necessary
+	if minify:
+		if minification_available:
+			stringBuffer = htmlmin.minify(stringBuffer)
+		else:
+			print 'Library htmlmin is not available. Proceeding with no minification.'
+
 	w.write(stringBuffer)
+	
+	f.close()
 	w.close()
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Converts a markdown file to HTML")
 	parser.add_argument("infile", help="Markdown file to convert")
 	parser.add_argument("-outfile", help="HTML file name for converted file, default is <infile>.html")
+	parser.add_argument("-minify", help="Minfiy the HTML output.",type=bool)
 	args = parser.parse_args()
 	print 'Converting ' + args.infile + 'to HTML..'	
-	convert(args.infile, args.outfile)
+	convert(args.infile, args.outfile, args.minify)
 	print 'Done.'
