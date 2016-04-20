@@ -69,7 +69,7 @@ h1,h2,h3 	{color: rebeccapurple;}
 			if ul == 0:
 				stringBuffer += '<ul>'
 				ul = 1				
-			stringBuffer += '<li>' + line.strip('-') + '</li>'
+			stringBuffer += '<li>' + line.strip().strip('-') + '</li>'
 		else:
 			if pre == 1:
 				stringBuffer += '</pre>' 
